@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="GBK"?>
+<project name="monitor" default="del_needless" basedir=".">
+	<!--最后打包后zip的名称,该记录不要删除,每次升级增加一行包名将以前的注释掉-->
+	<!--property name="PACKAGE_ZIP_NAME" value="emms_sp1.0.zip"/-->
+	<property name="PACKAGE_ZIP_NAME" value="fastdfs_client.zip"/>
+	<!--最后打包后zip解压后的目录名称-->
+	<property name="PACKAGE_DIR_NAME" value="fastdfs_client"/>
+	<!--最后打包class文件的jar包名称-->
+	<property name="PACKAGE_JAR_NAME" value="fastdfs_client.jar"/>
+	<!--确定工程的目录路径和build.xml的相对位置,一般为build.xml所在路径的上一层目录-->
+	<property name="PROJECT_HOME" value="./"/>
+	<!--指定项目文件存放的项目目录-->
+	<property name="TARGET" value="${PROJECT_HOME}/dist/${PACKAGE_DIR_NAME}"/>
+	<!--指定打包后的文件存放位置-->
+	<property name="TARGET_DIR" value="${PROJECT_HOME}/dist"/>
+	
+	<!--定义在编译、复制等操作中方便用到的值-->
+	<!--源码中的路径-->
+	<property name="SRC" value="${PROJECT_HOME}/src"/>
+	<property name="LIB" value="${PROJECT_HOME}/lib"/>
+	<!--打包后目标文件中的路径-->
+	
+
+	<property name="BUILD_JAVA_CLASSES" value="${PROJECT_HOME}/classes"/>
+	<property name="BUILD_LIB" value="${TARGET}/lib"/>
+	<!--删除dist目录-->
+	<target name="clear_dirs">
+        <echo message="delete dist"/>             	
+		<delete dir="${TARGET_DIR}"/>
+ 	</target>
+
+	<!--指定项目的类路径目录-->
+	<path id="project.class.path" >	
+		<fileset dir="${LIB}">
+		  <include name="**/*.jar"/>
+		</fileset>
+	</path>
+
+	<!--创建web项目所需的目录-->
+	<target name="make_dirs" depends="clear_dirs">
+            	<echo message="create path"/>      
+            	<mkdir dir="${TARGET_DIR}"/>   
+				<mkdir dir="${BUILD_JAVA_CLASSES}"/>
+	</target>
+
+	<!--编译类、并放到目标文件中类存放的位置-->
+	<target name="compile" depends="make_dirs" >
+        <echo message="compile .java files"/>
+ 		<javac source="1.7" encoding="GBK" srcdir="${SRC}" debug="true" deprecation="false" destdir="${BUILD_JAVA_CLASSES}" 
+ 			includes="**/*.java" excludes="test/**/*.java,**/test/*.java" includeantruntime="on">
+ 			<classpath refid="project.class.path">	  	
+			</classpath>
+    	</javac>          	
+ 	</target>
+
+	<!--复制文件到目标文件中,用include和exculde来精确指定某个和某类文件-->
+    <target name="build_war" depends="compile">
+		<copy todir="${BUILD_LIB}">
+			<!--fileset dir="${LIB}">
+			<include name="*.jar"/>
+			</fileset-->
+			
+			<fileset dir="${LIB}">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+    	
+    	<copy todir="${TARGET_DIR}">
+    				<fileset dir="${SRC}">
+    	             			<include name="*.conf"/>
+    							<include name="*.properties"/>
+    	            </fileset>            		            		
+    	</copy>
+    	
+	</target>
+	
+	<target name="jar" depends="build_war">
+				<zip destfile="${TARGET_DIR}/${PACKAGE_JAR_NAME}" basedir="${BUILD_JAVA_CLASSES}"/>
+				<!--将编译好的jar包复制到最终的项目包中-->
+				<echo message="复制${TARGET_DIR}/${PACKAGE_JAR_NAME}到${BUILD_LIB}"/>
+				<copy todir="${BUILD_LIB}">
+					<fileset dir="${TARGET_DIR}">
+									<include name="${PACKAGE_JAR_NAME}" />
+					</fileset>
+				</copy>
+	</target>
+
+	<!--打包成zip包,便于更改配置文件-->
+	<target name="zip" depends="jar">
+		<zip destfile="${TARGET_DIR}/${PACKAGE_ZIP_NAME}" basedir="${TARGET_DIR}" excludes="${PACKAGE_JAR_NAME}"/>
+	</target>
+	
+	
+	
+	<!--删除多余的文件-->
+	<target name="del_jar" depends="zip">
+		        <echo message="delete needless"/>		
+				<delete dir="${BUILD_JAVA_CLASSES}"/>
+	</target>
+	
+	<!--删除多余的文件-->
+	<target name="del_needless" depends="del_jar">
+	        <echo message="delete needless"/>		
+			<delete dir="${TARGET}"/>
+			<delete file="${PROJECT_HOME}/dist/${PACKAGE_ZIP_NAME}"/>
+	</target>
+</project>

@@ -1,0 +1,145 @@
+/**
+ * @desc
+ * @author ma
+ * @date 2015年6月1日
+ * 
+ */
+package org.csource;
+
+import java.io.IOException;
+
+import org.csource.common.MyException;
+import org.csource.common.NameValuePair;
+import org.csource.fastdfs.StorageClient;
+import org.csource.fastdfs.TrackerClient;
+import org.csource.fastdfs.TrackerServer;
+
+public class FileService {
+	private static FileService instance = null;
+	private StorageClient client = null;
+
+	private FileService() throws Exception {
+
+		ClientGlobal.init(ClientGlobal.conf_filename);
+		TrackerClient tracker = new TrackerClient();
+		TrackerServer trackerServer = tracker.getConnection();
+		client = new StorageClient(trackerServer, null);
+
+	}
+
+	public static FileService getInstance() {
+		try {
+			if (instance == null) {
+				synchronized (FileService.class) {
+					instance = new FileService();
+				}
+			}
+		} catch (Exception e) {
+
+		}
+		return instance;
+	}
+
+	/**
+	 * 
+	 * @param file_buff
+	 *            file 文件内容
+	 * @param file_ext_name
+	 *            文件类型不包含. 如 txt doc jpg
+	 * @return 第一个元素为group_name 第二个元素为remote_filename
+	 * @throws IOException
+	 * @throws MyException
+	 */
+	public String[] upload_file(byte[] file_buff, String file_ext_name)
+			throws IOException, MyException {
+		return client.upload_file(file_buff, file_ext_name,
+				new NameValuePair[] {});
+	}
+
+	/**
+	 * download file from storage server
+	 * 
+	 * @param group_name
+	 *            the group name of storage server
+	 * @param remote_filename
+	 *            filename on storage server
+	 * @return file content/buff, return null if fail
+	 */
+	public byte[] download_file(String group_name, String remote_filename)
+			throws IOException, MyException {
+		final long file_offset = 0;
+		final long download_bytes = 0;
+
+		return client.download_file(group_name, remote_filename, file_offset,
+				download_bytes);
+	}
+
+	/**
+	 * delete file from storage server
+	 * 
+	 * @param group_name
+	 *            the group name of storage server
+	 * @param remote_filename
+	 *            filename on storage server
+	 * @return 0 for success, none zero for fail (error code)
+	 */
+	public int delete_file(String group_name, String remote_filename)
+			throws IOException, MyException {
+		return client.delete_file(group_name, remote_filename);
+	}
+
+	/**
+	 * upload file to storage server (by file name)
+	 * 
+	 * @param local_filename
+	 *            local filename to upload
+	 * @return 2 elements string array if success:<br>
+	 *         <ul>
+	 *         <li>results[0]: the group name to store the file</li>
+	 *         </ul>
+	 *         <ul>
+	 *         <li>results[1]: the new created filename</li>
+	 *         </ul>
+	 *         return null if fail
+	 */
+	public String[] upload_file(String local_filename) throws IOException,
+			MyException {
+		return client.upload_file(local_filename, null, null);
+	}
+	
+	
+	/**
+	* download file from storage server
+	* @param group_name the group name of storage server
+	* @param remote_filename filename on storage server
+	* @param local_filename  filename on local
+	* @return 0 success, return none zero errno if fail
+	*/
+	public int download_file(String group_name, String remote_filename,
+			String local_filename) throws IOException, MyException {
+		return client.download_file(group_name, remote_filename, 0, 0,
+				local_filename);
+	}
+	
+	public static void main(String[] args) throws Exception {
+		if( args== null || args.length==0){
+			System.exit(0);
+		}
+		if(args.length>=1){
+			//当参数长度为1时，则是打印所有的mbean信息
+			FileService fs = FileService.getInstance();
+			if(args.length == 1){
+				String[] results = fs.upload_file(args[0]);
+				System.err.println("group_name: " + results[0] + ", remote_filename: " + results[1]);
+			}else if(args.length == 3){
+				int result = fs.download_file(args[0],args[1],args[2]);
+				System.err.println("result " +result);
+			}
+			
+		}
+		
+	}
+
+}
+
+
