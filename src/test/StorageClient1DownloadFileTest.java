@@ -126,16 +126,15 @@ public class StorageClient1DownloadFileTest {
 			if(size-init <=buffer){
 				buffer=size-init;
 			}
-		int result = client.download_file1(fileid, init,
+			int result = client.download_file1(fileid, init,
 				buffer,
-				"c:\\"
-						+ prefix.replaceAll("/", "_").concat("-")
-								.concat(String.valueOf(index)).concat(".").concat(file_ext_name));
-		System.err.println(result);
-		init += buffer;
-		index++;
-		//assertTrue("true", result == 0);
-		 }
+				"c:\\"+ prefix.replaceAll("/", "_").concat("-")
+					.concat(String.valueOf(index)).concat(".").concat(file_ext_name));
+			System.err.println(result);
+			init += buffer;
+			index++;
+			//assertTrue("true", result == 0);
+		}
 
 		System.err.println((System.currentTimeMillis() - temp) / 1000.0 + "S");
 	}
