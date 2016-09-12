@@ -123,29 +123,6 @@ public class FileService {
 		}finally {
 			releaseResourse(client);
 		}
-		
-
-
-
-		/*
-		 * try {
-		 * 
-		 * File file = new File(local_filename); long length = file.length();
-		 * logger.info("FileService StorageServer:"+client.getStorageServer()+
-		 * ",TrackerServer:"+client.getTrackerServer()); long size = 0; //计算中断时间
-		 * while(size<length) { assignResourse(fileid);
-		 * logger.info("FileService StorageServer:"
-		 * +client.getStorageServer()+",TrackerServer:"
-		 * +client.getTrackerServer()); //客户端记录已上成功上传到服务端的记录 size =
-		 * upload_file(fileid, size,length,new FileInputStream(file));
-		 * //发生异常后sleep1秒 Thread.sleep(1000);
-		 * //如果size相同代表没有进行上传，需要把等待服务端回滚和网络异常的时间区分开 if(size < length){
-		 * //因异常中断服务端会抹去追加的部分，需等待服务端抹去后再上传 long temp =
-		 * System.currentTimeMillis(); size = compare(fileid, size,temp); } }
-		 * 
-		 * } finally{ releaseResourse(); }
-		 */
-
 	}
 	
 	/**
@@ -165,9 +142,7 @@ public class FileService {
 		byte[] buff = new byte[ClientGlobal.section_size];
 		is.skip(skipsize);
 		while (skipsize < length) {
-			int readcount = is
-					.read(buff,
-							0,
+			int readcount = is.read(buff, 0,
 							(length - skipsize) < buff.length ? (int) (length - skipsize)
 									: buff.length);
 			int result = -1;
